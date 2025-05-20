@@ -6,12 +6,13 @@ from models import Sales, Product
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session, joinedload
 from dto.sales import GetSalesDTO, GetSalesByDateRangeDTO, CompareSalesDTO
+from dto.sales import openapi_extra_GetSalesDTO, openapi_extra_GetSalesByDateRangeDTO
 
-router = APIRouter(prefix="/sales", tags=["sales"])
+router = APIRouter(prefix="/sales", tags=["Sales"])
 session: Session = Depends(get_db)
 
-@router.get("/list/")
-async def getSales(request: Request, db = session):
+@router.get("/list/", openapi_extra=openapi_extra_GetSalesDTO)
+def getSales(request: Request, db = session):
     params = dict(request.query_params)
     dto = GetSalesDTO(**params)
     
@@ -20,10 +21,13 @@ async def getSales(request: Request, db = session):
     )
     query = query.join(Sales.product).join(Product.category)
     
-    if dto.date_range:
-        start_date, end_date = dto.date_range
-        query = query.filter(Sales.date_created.between(start_date, end_date))
-        
+    if dto.start_date and dto.end_date:
+        query = query.filter(Sales.date_created.between(dto.start_date, dto.end_date))
+    elif dto.start_date:
+        query = query.filter(Sales.date_created >= dto.start_date)
+    elif dto.end_date:
+        query = query.filter(Sales.date_created <= dto.end_date)
+    
     if dto.category_id:
         query = query.filter(Product.category_id == dto.category_id)
     elif dto.product_id:
@@ -39,7 +43,7 @@ async def getSales(request: Request, db = session):
     
     return query.all()
 
-@router.get("/range/")
+@router.get("/range/", openapi_extra=openapi_extra_GetSalesByDateRangeDTO)
 def getSalesInRange(request: Request, db = session):
     params = dict(request.query_params)
     dto = GetSalesByDateRangeDTO(**params)

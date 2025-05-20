@@ -5,11 +5,12 @@ from models import Inventory, Product
 from sqlalchemy.orm import Session, joinedload
 from fastapi import APIRouter, Depends, Request, HTTPException
 from dto.inventory import GetInventoryDTO, UpdateInventoryDTO
+from dto.inventory import openapi_extra_GetInventoryDTO
 
-router = APIRouter(prefix="/inventory", tags=["inventory"])
+router = APIRouter(prefix="/inventory", tags=["Inventory"])
 session: Session = Depends(get_db)
 
-@router.get('/list')
+@router.get('/list', openapi_extra=openapi_extra_GetInventoryDTO, )
 def getList(request: Request, db = session):
     params = dict(request.query_params)
     dto = GetInventoryDTO(**params)
@@ -25,7 +26,10 @@ def getList(request: Request, db = session):
     elif dto.product_id:
         query = query.filter(Product.id == dto.product_id)
     
-    products = query.all()
+    if (dto.offset):
+        query = query.offset(dto.offset)
+    
+    products = query.limit(dto.limit).all()
     result = []
 
     for product in products:
