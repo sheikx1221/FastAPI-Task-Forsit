@@ -1,8 +1,8 @@
 import uuid
 from sqlalchemy import func
 from database import get_db
-from models import Inventory, Product
 from sqlalchemy.orm import Session, joinedload
+from models import Inventory, Product, Supplier
 from fastapi import APIRouter, Depends, Request, HTTPException
 from dto.inventory import GetInventoryDTO, UpdateInventoryDTO
 from dto.inventory import openapi_extra_GetInventoryDTO
@@ -58,11 +58,31 @@ def updateInventory(body: UpdateInventoryDTO, db: Session = Depends(get_db)):
             detail=f"Product with id {body.product_id} not found"
         )
     
+    if (body.quantity == 0):
+        raise HTTPException(
+                status_code=402,
+                detail=f"Quantity cannot be zero"
+            )
+        
+    if (body.quantity > 0):
+        if not body.supplier_id:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Please provide supplier id since product is purchased"
+            )
+
+        supplier = db.query(Supplier).filter(Supplier.id == body.supplier_id).first()
+        if not supplier:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Supplier with id {body.supplier_id} not found"
+            )
+    
     new_inventory = Inventory(
         id=uuid.uuid4(),
         quantity=body.quantity,
         product_id=body.product_id,
-        supplier_id=body.supplier_id if body.supplier_id else None
+        supplier_id=body.supplier_id if body.quantity > 0 else None
     )
     
     try:

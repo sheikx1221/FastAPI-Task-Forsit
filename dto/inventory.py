@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 class GetInventoryDTO(BaseModel):
     category_id: str | None = None
@@ -7,7 +7,7 @@ class GetInventoryDTO(BaseModel):
     limit: int = 10
     offset: int | None = None
 class UpdateInventoryDTO(BaseModel):
-    quantity: int
+    quantity: int | None = None
     product_id: str | None = None
     supplier_id: str | None = None
     
