@@ -25,19 +25,19 @@ The application also help you track inventory, get sale/purchase history by pass
 
 ## Setup guide
 - Clone the repository locally
-- If you are using python > 3.x, you will need to create virtual env, copy paste the below command after cloning repository
+- If you are using python > 3.x, you will need to create virtual env, copy paste the below command after cloning repository  
 `python3 -m venv .venv`
-- Install libraries
+- Install libraries  
 `pip install -r requirements.txt`
 - After installing, set .env file, shared on email with hosted database path
-- To use local db, just replace `DATABASE_URL` inside .env with local db url
+- To use local db, just replace `DATABASE_URL` inside .env with local db url  
 `DATABASE_URL = postgres:user:password@localhost:5432/db_name`
-- If using local database run the following command to seed test data in database
+- If using local database run the following command to seed test data in database  
 `python seed.py`
-- Once done run the server using the following command
+- Once done run the server using the following command  
 `uvicorn main:app --reload`
 
 ## API Documentation
 I have fixed Swagger documentation and you can directly test all endpoints from there.  
 Open the following link on your browser
-`https://127.0.0.1:8000/docs`
+`http://127.0.0.1:8000/docs`
